@@ -1,0 +1,193 @@
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    const searchBar = document.getElementById('searchBar');
+    const searchBtn = document.querySelector('.btn-search');
+    const newTabBtn = document.querySelector('.btn-new-tab');
+    const tabsContainer = document.getElementById('tabsContainer');
+    const urlDisplay = document.getElementById('urlDisplay');
+    const welcomeContainer = document.getElementById('welcomeContainer');
+    const welcomeText = document.getElementById('welcomeText');
+    const iframeContainer = document.getElementById('iframeContainer');
+    const mainFrame = document.getElementById('mainFrame');
+    const gamesContainer = document.getElementById('gamesContainer');
+
+    let tabCounter = 2, currentTab = 1;
+    const tabsData = {1:{url:null, searchQuery:null, showGames:false}};
+
+    const COVER_BASE = "https://cdn.jsdelivr.net/gh/gn-math/covers@main";
+    const HTML_BASE = "https://cdn.jsdelivr.net/gh/gn-math/html@main";
+
+    const shortcutUrls = {
+        "gmz.alex": "games",
+        "pxy.alex": "https://learnbridge.institute"
+    };
+
+    const fallbackGames = Array.from({length:12}, (_,id) => ({
+        id,
+        name: `Game ${id}`,
+        cover: `${COVER_BASE}/${id}.png`,
+        url: `${HTML_BASE}/${id}.html`
+    }));
+
+    function loadGames(games){
+        gamesContainer.innerHTML = "";
+        games.forEach(game => {
+            const card = document.createElement('div');
+            card.className = 'game-card';
+            card.innerHTML = `<img src="${game.cover}" class="game-icon"><div class="game-title">${game.name}</div>`;
+            card.addEventListener('click', () => {
+                tabsData[currentTab] = {url: game.url, searchQuery: null, showGames: true};
+                mainFrame.src = game.url;
+                iframeContainer.style.display = 'block';
+                welcomeContainer.style.display = 'none';
+                gamesContainer.style.display = 'none';
+                urlDisplay.textContent = game.name;
+            });
+            gamesContainer.appendChild(card);
+        });
+    }
+
+    function fetchGames(){
+        fetch("https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json")
+        .then(r => r.json())
+        .then(data => {
+            const games = data
+                .filter(item => item.cover && item.url)
+                .map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    cover: item.cover.replace("{COVER_URL}", COVER_BASE),
+                    url: item.url.replace("{HTML_URL}", HTML_BASE)
+                }));
+            loadGames(games);
+        })
+        .catch(() => loadGames(fallbackGames));
+    }
+
+    function isUrl(str){
+        return /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](\.[a-zA-Z]{2,})+$/.test(str);
+    }
+
+    function processSearch(){
+        const query = searchBar.value.trim().toLowerCase();
+        if(!query) return;
+
+        if(shortcutUrls[query]){
+            const target = shortcutUrls[query];
+            if(target === "games"){
+                gamesContainer.style.display = 'grid';
+                iframeContainer.style.display = 'none';
+                welcomeContainer.style.display = 'none';
+                fetchGames();
+                urlDisplay.textContent = 'GMZ Games - All Games';
+                tabsData[currentTab] = {url:null, searchQuery:'gmz.alex', showGames:true};
+            } else {
+                const url = target;
+                tabsData[currentTab] = {url:url, searchQuery:null, showGames:false};
+                iframeContainer.style.display = 'block';
+                welcomeContainer.style.display = 'none';
+                gamesContainer.style.display = 'none';
+                mainFrame.src = url;
+                urlDisplay.textContent = url;
+            }
+        }
+        else if(isUrl(query)){
+            let url = query;
+            if(!url.startsWith('http')) url = 'https://' + url;
+            tabsData[currentTab] = {url:url, searchQuery:null, showGames:false};
+            iframeContainer.style.display = 'block';
+            welcomeContainer.style.display = 'none';
+            gamesContainer.style.display = 'none';
+            mainFrame.src = url;
+            urlDisplay.textContent = url;
+        }
+        else{
+            tabsData[currentTab] = {url:null, searchQuery:query, showGames:false};
+            iframeContainer.style.display = 'none';
+            gamesContainer.style.display = 'none';
+            welcomeContainer.style.display = 'flex';
+            generateAIResponse(query);
+            urlDisplay.textContent = `AI Response: ${query}`;
+        }
+    }
+
+    function generateAIResponse(query){
+        const responses = [
+            `Based on my knowledge, ${query} is an interesting topic.`,
+            `Regarding "${query}", I found several resources that might be helpful.`,
+            `The query "${query}" touches on a complex subject.`,
+            `After analyzing "${query}", I can provide some insights.`,
+            `On the topic of "${query}", research shows multiple viewpoints.`
+        ];
+        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        welcomeText.innerHTML = `<h2>AI Response for: "${query}"</h2><p>${randomResponse}</p><p>This is a simulated AI response.</p>`;
+    }
+
+    searchBtn.addEventListener('click', processSearch);
+    searchBar.addEventListener('keypress', e => { if(e.key==='Enter') processSearch(); });
+
+    newTabBtn.addEventListener('click', () => {
+        const newTab = document.createElement('div');
+        newTab.className='tab';
+        newTab.dataset.tab=tabCounter;
+        newTab.innerHTML=`Tab ${tabCounter} <span class="tab-close" data-tab="${tabCounter}">×</span>`;
+        tabsContainer.appendChild(newTab);
+        tabsData[tabCounter] = {url:null, searchQuery:null, showGames:false};
+        activateTab(newTab);
+        tabCounter++;
+    });
+
+    tabsContainer.addEventListener('click', e => {
+        const tab = e.target.closest('.tab'); if(!tab) return;
+        if(e.target.classList.contains('tab-close')) closeTab(tab.dataset.tab);
+        else activateTab(tab);
+    });
+
+    function closeTab(tabId){
+        const tab = document.querySelector(`.tab[data-tab="${tabId}"]`);
+        if(!tab) return;
+        if(tab.classList.contains('active')){
+            const others = document.querySelectorAll(`.tab:not([data-tab="${tabId}"])`);
+            if(others.length) activateTab(others[0]);
+        }
+        tab.remove();
+        delete tabsData[tabId];
+    }
+
+    function activateTab(tab){
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentTab = parseInt(tab.dataset.tab);
+        const data = tabsData[currentTab];
+        if(!data) return;
+
+        if(data.showGames){
+            gamesContainer.style.display='grid';
+            iframeContainer.style.display='none';
+            welcomeContainer.style.display='none';
+            fetchGames();
+        }
+        else if(data.url){
+            iframeContainer.style.display='block';
+            welcomeContainer.style.display='none';
+            gamesContainer.style.display='none';
+            mainFrame.src = data.url;
+            urlDisplay.textContent = data.url;
+        }
+        else if(data.searchQuery){
+            iframeContainer.style.display='none';
+            welcomeContainer.style.display='flex';
+            gamesContainer.style.display='none';
+            generateAIResponse(data.searchQuery);
+            urlDisplay.textContent = `AI Response: ${data.searchQuery}`;
+        }
+        else{
+            iframeContainer.style.display='none';
+            welcomeContainer.style.display='flex';
+            gamesContainer.style.display='none';
+            welcomeText.innerHTML = `<h2>Welcome to Tab ${currentTab}</h2><p>Enter a URL or search query to begin.</p>`;
+            urlDisplay.textContent = `Tab ${currentTab} - Enter a URL or search term`;
+        }
+    }
+});
+</script>
