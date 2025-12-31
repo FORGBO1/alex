@@ -135,22 +135,12 @@ document.addEventListener('DOMContentLoaded', function(){
             iframeContainer.style.display='block'; welcomeContainer.style.display='none'; gamesContainer.style.display='none';
             mainFrame.src=url; urlDisplay.textContent=url;
         } else{
-            tabsData[currentTab]={url:null,searchQuery:query,showGames:false};
-            iframeContainer.style.display='none'; gamesContainer.style.display='none'; welcomeContainer.style.display='flex';
-            generateAIResponse(query); urlDisplay.textContent=`AI Response: ${query}`;
+            // AI + Web search: show iframe with search results
+            const searchUrl=`https://www.bing.com/search?q=${encodeURIComponent(query)}`;
+            tabsData[currentTab]={url:searchUrl,searchQuery:query,showGames:false};
+            iframeContainer.style.display='block'; welcomeContainer.style.display='none'; gamesContainer.style.display='none';
+            mainFrame.src=searchUrl; urlDisplay.textContent=`Search: ${query}`;
         }
-    }
-
-    function generateAIResponse(query){
-        const responses=[
-            `Based on my knowledge, ${query} is an interesting topic.`,
-            `Regarding "${query}", I found several resources that might be helpful.`,
-            `The query "${query}" touches on a complex subject.`,
-            `After analyzing "${query}", I can provide some insights.`,
-            `On the topic of "${query}", research shows multiple viewpoints.`
-        ];
-        const randomResponse=responses[Math.floor(Math.random()*responses.length)];
-        welcomeText.innerHTML=`<h2>AI Response for: "${query}"</h2><p>${randomResponse}</p><p>This is a simulated AI response.</p>`;
     }
 
     searchBtn.addEventListener('click',processSearch);
@@ -184,7 +174,6 @@ document.addEventListener('DOMContentLoaded', function(){
         if(!data)return;
         if(data.showGames){gamesContainer.style.display='grid'; iframeContainer.style.display='none'; welcomeContainer.style.display='none'; fetchGames();}
         else if(data.url){iframeContainer.style.display='block'; welcomeContainer.style.display='none'; gamesContainer.style.display='none'; mainFrame.src=data.url; urlDisplay.textContent=data.url;}
-        else if(data.searchQuery){iframeContainer.style.display='none'; welcomeContainer.style.display='flex'; gamesContainer.style.display='none'; generateAIResponse(data.searchQuery); urlDisplay.textContent=`AI Response: ${data.searchQuery}`;}
         else{iframeContainer.style.display='none'; welcomeContainer.style.display='flex'; gamesContainer.style.display='none'; welcomeText.innerHTML=`<h2>Welcome to Tab ${currentTab}</h2><p>Enter a URL or search query to begin.</p>`; urlDisplay.textContent=`Tab ${currentTab} - Enter a URL or search term`;}
     }
 });
