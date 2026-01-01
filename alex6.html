@@ -1,0 +1,313 @@
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alex Browse</title>
+
+<style>
+/* ===== GLOBAL ===== */
+html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+    background:#05000a;
+    color:#fff;
+    overflow:hidden;
+}
+
+/* ===== CONTAINER ===== */
+.browser-container{
+    width:100%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+}
+
+/* ===== HEADER ===== */
+.browser-header{
+    background:linear-gradient(270deg,#5f2cff,#9b5cff,#c77dff);
+    background-size:400% 400%;
+    animation:headerGlow 12s ease infinite;
+    padding:15px 20px;
+    display:flex;
+    flex-direction:column;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+@keyframes headerGlow{
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+
+/* ===== TABS ===== */
+.tabs-container{
+    display:flex;
+    overflow-x:auto;
+    padding:5px 10px;
+    background:#0c0618;
+    margin-bottom:10px;
+}
+
+.tab{
+    background:#1a1033;
+    border-radius:10px 10px 0 0;
+    padding:8px 40px 8px 15px;
+    margin-right:6px;
+    cursor:pointer;
+    font-size:0.9rem;
+    display:flex;
+    align-items:center;
+    min-width:150px;
+    position:relative;
+    transition:all 0.3s ease;
+}
+
+.tab.active{
+    background:#2b155a;
+    box-shadow:0 0 12px rgba(155,92,255,0.8);
+    border-bottom:3px solid #9b5cff;
+}
+
+.tab:hover{
+    transform:translateY(-2px);
+}
+
+.tab-close{
+    margin-left:8px;
+    width:20px;
+    height:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    cursor:pointer;
+}
+
+.tab-close:hover{
+    background:rgba(255,255,255,0.25);
+}
+
+/* ===== SEARCH ===== */
+.search-container{
+    display:flex;
+    gap:10px;
+    padding:0 10px 10px;
+    align-items:center;
+}
+
+.bing-icon{
+    width:32px;
+    height:32px;
+    border-radius:6px;
+    border:1px solid #9b5cff;
+}
+
+.search-bar{
+    flex:1;
+    padding:12px 20px;
+    border-radius:30px;
+    border:none;
+    background:#1a1033;
+    color:white;
+    font-size:1rem;
+    outline:none;
+    box-shadow:inset 0 0 8px rgba(155,92,255,0.4);
+}
+
+.search-bar::placeholder{
+    color:rgba(255,255,255,0.6);
+}
+
+.btn{
+    padding:10px 22px;
+    border-radius:30px;
+    border:none;
+    cursor:pointer;
+    font-weight:bold;
+    transition:all 0.3s ease;
+}
+
+/* ===== MODIFIED BUTTONS ===== */
+.btn-search, .btn-new-tab {
+    background:#1a1033; /* dark purple for both buttons */
+    color:white;
+}
+
+.btn-search:hover, .btn-new-tab:hover {
+    background:#2b155a; /* slightly lighter purple on hover */
+    transform:scale(1.05);
+}
+
+/* ===== URL BAR ===== */
+.url-display{
+    padding:6px 20px;
+    font-size:0.9rem;
+    background:#0c0618;
+    color:#bbb;
+    border-top:1px solid rgba(255,255,255,0.1);
+}
+
+/* ===== CONTENT ===== */
+.content-container{
+    flex:1;
+    position:relative;
+}
+
+.welcome-container{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:40px;
+}
+
+.welcome-title{
+    font-size:2.7rem;
+    background:linear-gradient(90deg,#9b5cff,#e0b3ff);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.welcome-text{
+    max-width:800px;
+    line-height:1.6;
+    margin-top:20px;
+    color:#ddd;
+}
+
+/* ===== IFRAME ===== */
+.iframe-container{
+    display:none;
+    height:100%;
+}
+
+iframe{
+    width:100%;
+    height:100%;
+    border:none;
+}
+
+/* ===== GAMES ===== */
+.games-container{
+    display:none;
+    padding:20px;
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+    gap:15px;
+}
+
+.game-card{
+    background:#12091f;
+    border-radius:12px;
+    padding:10px;
+    text-align:center;
+    border:1px solid rgba(155,92,255,0.3);
+    transition:all 0.3s ease;
+    cursor:pointer;
+}
+
+.game-card:hover{
+    transform:translateY(-6px) scale(1.02);
+    box-shadow:0 0 25px rgba(155,92,255,0.8);
+}
+
+.game-icon{
+    width:100px;
+    height:100px;
+    border-radius:10px;
+    border:1px solid #9b5cff;
+}
+
+.game-title{
+    margin-top:8px;
+    font-size:0.9rem;
+}
+
+/* ===== MOBILE ===== */
+@media(max-width:768px){
+    .search-container{flex-direction:column}
+    .tab{min-width:120px}
+}
+</style>
+</head>
+
+<body>
+<div class="browser-container">
+    <div class="browser-header">
+        <div class="tabs-container" id="tabsContainer">
+            <div class="tab active" data-tab="1">Home <span class="tab-close">×</span></div>
+        </div>
+
+        <div class="search-container">
+            <img class="bing-icon" src="https://th.bing.com/th/id/R.270ef77e819b2d673848751ee067304a?rik=owewyaLZ6L%2bKKQ&amp;pid=ImgRaw&amp;r=0">
+            <input class="search-bar" id="searchBar" placeholder="Enter a URL or search query...">
+            <button class="btn btn-search">Search</button>
+            <button class="btn btn-new-tab">New Tab</button>
+        </div>
+    </div>
+
+    <div class="url-display" id="urlDisplay">alex browse pussy</div>
+
+    <div class="content-container">
+        <div class="welcome-container" id="welcomeContainer">
+            <h1 class="welcome-title">Welcome to Alex Browse</h1>
+            <div class="welcome-text">
+                A futuristic purple animated browser experience.<br>
+                Try entering <b>github.com</b> or <b>gmz.alex</b>
+            </div>
+        </div>
+
+        <div class="iframe-container" id="iframeContainer">
+            <iframe id="mainFrame"></iframe>
+        </div>
+
+        <div class="games-container" id="gamesContainer"></div>
+    </div>
+</div>
+
+<script>
+const searchBar=document.getElementById("searchBar");
+const iframeContainer=document.getElementById("iframeContainer");
+const welcomeContainer=document.getElementById("welcomeContainer");
+const gamesContainer=document.getElementById("gamesContainer");
+const mainFrame=document.getElementById("mainFrame");
+const urlDisplay=document.getElementById("urlDisplay");
+
+document.querySelector(".btn-search").onclick=()=>{
+    const q=searchBar.value.trim();
+    if(!q) return;
+
+    if(q==="gmz.alex"){
+        welcomeContainer.style.display="none";
+        iframeContainer.style.display="none";
+        gamesContainer.style.display="grid";
+        urlDisplay.textContent="GMZ Games Hub";
+        gamesContainer.innerHTML="";
+        for(let i=1;i<=12;i++){
+            const g=document.createElement("div");
+            g.className="game-card";
+            g.innerHTML=`<img class="game-icon" src="https://cdn.jsdelivr.net/gh/gn-math/covers@main/${i}.png"><div class="game-title">Game ${i}</div>`;
+            g.onclick=()=>window.open(`https://raw.githack.com/gn-math/html/main/${i}.html`);
+            gamesContainer.appendChild(g);
+        }
+    }else if(q.includes(".")){
+        let url=q.startsWith("http")?q:"https://"+q;
+        mainFrame.src=url;
+        iframeContainer.style.display="block";
+        welcomeContainer.style.display="none";
+        gamesContainer.style.display="none";
+        urlDisplay.textContent=url;
+    }else{
+        iframeContainer.style.display="none";
+        gamesContainer.style.display="none";
+        welcomeContainer.style.display="flex";
+        urlDisplay.textContent="AI Response";
+    }
+};
+</script>
+
+</body></html>
