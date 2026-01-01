@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alex Browse</title>
+
+<style>
+html, body {
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+    background:#000;
+    color:#fff;
+    overflow:hidden;
+}
+
+.browser-container{
+    width:100%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+}
+
+.browser-header{
+    background:#1e1e2a;
+    padding:15px 20px;
+    display:flex;
+    flex-direction:column;
+    border-bottom:1px solid #333;
+    flex-shrink:0;
+}
+
+/* ===== TABS ===== */
+.tabs-container{
+    display:flex;
+    overflow-x:auto;
+    padding:5px 10px;
+    background:#121212;
+    margin-bottom:10px;
+    min-height:40px;
+}
+
+.tab{
+    background:#2d2d3a;
+    border-radius:8px 8px 0 0;
+    padding:8px 40px 8px 15px;
+    margin-right:5px;
+    cursor:pointer;
+    font-size:0.9rem;
+    display:flex;
+    align-items:center;
+    min-width:150px;
+    position:relative;
+}
+
+.tab.active{
+    background:#1e1e2a;
+    border-bottom:2px solid #9b5cff;
+    color:#fff;
+}
+
+.tab-close{
+    margin-left:8px;
+    cursor:pointer;
+    font-size:14px;
+    width:20px;
+    height:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+}
+
+.tab-close:hover{
+    background:rgba(255,255,255,0.2);
+}
+
+/* ===== SEARCH BAR ===== */
+.search-container{
+    display:flex;
+    gap:10px;
+    padding:0 10px 10px;
+    align-items:center;
+}
+
+/* Bing icon with white background */
+.bing-icon{
+    width:32px;
+    height:32px;
+    border-radius:6px;
+    background:#fff;
+    padding:3px;
+    object-fit:cover;
+    border:1px solid #333;
+    cursor:pointer;
+}
+
+.search-bar{
+    flex:1;
+    padding:12px 20px;
+    border-radius:30px;
+    border:none;
+    background:#2d2d3a;
+    color:white;
+    font-size:1rem;
+    outline:none;
+}
+
+.search-bar::placeholder{
+    color:rgba(255,255,255,0.6);
+}
+
+.btn{
+    padding:10px 20px;
+    border-radius:30px;
+    border:none;
+    cursor:pointer;
+    font-weight:bold;
+    transition:all 0.3s ease;
+}
+
+/* Animated purple search button */
+.btn-search{
+    background:linear-gradient(270deg,#7f5cff,#9b5cff,#c77dff);
+    background-size:400% 400%;
+    animation:purpleFlow 6s ease infinite;
+    color:white;
+    box-shadow:0 0 12px rgba(155,92,255,0.6);
+}
+
+@keyframes purpleFlow{
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+
+.btn-new-tab{
+    background:#2d2d3a;
+    color:white;
+}
+
+/* ===== CONTENT ===== */
+.url-display{
+    color:#aaa;
+    padding:5px 20px;
+    font-size:0.9rem;
+    background:#121212;
+    border-top:1px solid #333;
+}
+
+.content-container{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+
+.welcome-container{
+    flex:1;
+    padding:40px 20px;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+}
+
+.welcome-title{
+    font-size:2.5rem;
+    margin-bottom:20px;
+}
+
+.welcome-text{
+    max-width:800px;
+    line-height:1.6;
+    font-size:1.1rem;
+}
+
+.iframe-container{
+    flex:1;
+    display:none;
+}
+
+iframe{
+    width:100%;
+    height:100%;
+    border:none;
+}
+
+.games-container{
+    display:none;
+    padding:20px;
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+    gap:15px;
+}
+
+.game-card{
+    background:#1a1a1a;
+    border-radius:8px;
+    padding:10px;
+    text-align:center;
+    border:1px solid #333;
+    cursor:pointer;
+}
+
+.game-card:hover{
+    background:#222;
+    border-color:#9b5cff;
+}
+
+.game-icon{
+    width:100px;
+    height:100px;
+    border-radius:8px;
+    margin-bottom:8px;
+    border:1px solid #333;
+}
+
+.game-title{
+    font-size:0.9rem;
+}
+</style>
+</head>
+
+<body>
+<div class="browser-container">
+    <div class="browser-header">
+        <div class="tabs-container" id="tabsContainer">
+            <div class="tab active" data-tab="1">
+                Home <span class="tab-close">×</span>
+            </div>
+        </div>
+
+        <div class="search-container">
+            <img src="https://th.bing.com/th/id/R.270ef77e819b2d673848751ee067304a?rik=owewyaLZ6L%2bKKQ&pid=ImgRaw&r=0" class="bing-icon">
+            <input type="text" class="search-bar" id="searchBar" placeholder="Enter a URL or search query...">
+            <button class="btn btn-search">Search</button>
+            <button class="btn btn-new-tab">New Tab</button>
+        </div>
+    </div>
+
+    <div class="url-display" id="urlDisplay">
+        Welcome to Alex Browse - Enter a URL or search term
+    </div>
+
+    <div class="content-container">
+        <div class="welcome-container" id="welcomeContainer">
+            <h1 class="welcome-title">Welcome to Alex Browse!</h1>
+            <div class="welcome-text" id="welcomeText">
+                <p>Enter a URL like <b>example.com</b> or try <b>gmz.alex</b></p>
+            </div>
+        </div>
+
+        <div class="iframe-container" id="iframeContainer">
+            <iframe id="mainFrame"></iframe>
+        </div>
+
+        <div class="games-container" id="gamesContainer"></div>
+    </div>
+</div>
+
+<script>
+document.querySelector(".btn-search").onclick=()=>{
+    const q=document.getElementById("searchBar").value.trim();
+    if(!q) return;
+
+    if(q==="gmz.alex"){
+        document.getElementById("welcomeContainer").style.display="none";
+        document.getElementById("iframeContainer").style.display="none";
+        const g=document.getElementById("gamesContainer");
+        g.style.display="grid";
+        g.innerHTML="";
+        for(let i=1;i<=12;i++){
+            const c=document.createElement("div");
+            c.className="game-card";
+            c.innerHTML=`<img class="game-icon" src="https://cdn.jsdelivr.net/gh/gn-math/covers@main/${i}.png"><div class="game-title">Game ${i}</div>`;
+            c.onclick=()=>window.open(`https://raw.githack.com/gn-math/html/main/${i}.html`);
+            g.appendChild(c);
+        }
+        document.getElementById("urlDisplay").textContent="GMZ Games";
+    }else if(q.includes(".")){
+        const url=q.startsWith("http")?q:"https://"+q;
+        document.getElementById("mainFrame").src=url;
+        document.getElementById("iframeContainer").style.display="block";
+        document.getElementById("welcomeContainer").style.display="none";
+        document.getElementById("gamesContainer").style.display="none";
+        document.getElementById("urlDisplay").textContent=url;
+    }
+};
+</script>
+</body>
+</html>
+x
